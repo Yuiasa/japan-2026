@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Japón 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #1A1A18;
+  --ink-2: #3D3D38;
+  --ink-3: #6B6B62;
+  --ink-4: #9B9B90;
+  --paper: #F7F5F0;
+  --paper-2: #EFEDE6;
+  --paper-3: #E5E2D8;
+  --red: #C0392B;
+  --red-soft: #F5E8E6;
+  --gold: #B8860B;
+  --gold-soft: #F5F0E0;
+  --green: #2E7D52;
+  --green-soft: #E8F5EE;
+  --border: rgba(26,26,24,.1);
+  --border-2: rgba(26,26,24,.18);
+  --radius: 10px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  height: 100%;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+/* ── Layout ── */
+.app {
+  max-width: 420px;
+  margin: 0 auto;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding-top: var(--safe-top);
+  padding-bottom: calc(64px + var(--safe-bottom));
+}
+
+/* ── Screens ── */
+.screen { display: none; flex: 1; overflow-y: auto; }
+.screen.active { display: flex; flex-direction: column; }
+
+/* ── Login ── */
+#screen-login {
+  justify-content: center;
+  align-items: center;
+  padding: 40px 24px;
+  gap: 40px;
+}
+
+.login-hero { text-align: center; }
+.login-kana { font-family: 'Noto Serif JP', serif; font-size: 56px; color: var(--red); letter-spacing: .05em; line-height: 1; }
+.login-title { font-family: 'Noto Serif JP', serif; font-size: 22px; font-weight: 500; color: var(--ink); margin-top: 12px; }
+.login-sub { font-size: 13px; color: var(--ink-3); margin-top: 6px; }
+
+.players-grid { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+.player-btn {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 16px;
+  background: white; border: 1px solid var(--border);
+  border-radius: var(--radius); cursor: pointer;
+  transition: border-color .15s, background .15s;
+}
+.player-btn:hover { background: var(--paper-2); border-color: var(--border-2); }
+.player-avatar {
+  width: 40px; height: 40px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Noto Serif JP', serif; font-size: 16px;
+  flex-shrink: 0;
+}
+.player-info { text-align: left; }
+.player-name { font-size: 15px; font-weight: 500; color: var(--ink); }
+.player-role { font-size: 12px; color: var(--ink-3); }
+
+/* ── Top bar ── */
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid var(--border);
+  background: var(--paper);
+  position: sticky; top: 0; z-index: 10;
+}
+.topbar-player { display: flex; align-items: center; gap: 8px; }
+.topbar-avatar { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; }
+.topbar-name { font-size: 13px; font-weight: 500; }
+.topbar-coins {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 13px; font-weight: 500; color: var(--gold);
+  background: var(--gold-soft); padding: 4px 10px; border-radius: 20px;
+}
+
+/* ── Bottom nav ── */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 420px;
+  display: flex;
+  background: white; border-top: 1px solid var(--border);
+  padding-bottom: var(--safe-bottom);
+  z-index: 20;
+}
+.nav-btn {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  gap: 3px; padding: 10px 4px;
+  background: none; border: none; cursor: pointer;
+  font-size: 10px; color: var(--ink-4); font-family: 'Inter', sans-serif;
+  transition: color .15s;
+}
+.nav-btn.active { color: var(--red); }
+.nav-btn svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ── Day header ── */
+.day-header { padding: 20px 16px 12px; }
+.day-eyebrow { font-size: 11px; color: var(--ink-3); text-transform: uppercase; letter-spacing: .06em; }
+.day-title { font-family: 'Noto Serif JP', serif; font-size: 22px; font-weight: 500; color: var(--ink); margin-top: 4px; }
+.day-deadline { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--ink-3); margin-top: 5px; }
+
+/* ── Progress ── */
+.progress-wrap { padding: 0 16px 16px; }
+.progress-top { display: flex; justify-content: space-between; font-size: 12px; color: var(--ink-3); margin-bottom: 6px; }
+.progress-bar { height: 2px; background: var(--paper-3); border-radius: 2px; }
+.progress-fill { height: 100%; background: var(--red); border-radius: 2px; transition: width .4s; }
+
+/* ── Section label ── */
+.section-label {
+  font-size: 11px; color: var(--ink-3);
+  text-transform: uppercase; letter-spacing: .06em;
+  padding: 0 16px; margin: 14px 0 8px;
+}
+
+/* ── Reto card ── */
+.reto-wrap { padding: 0 16px; margin-bottom: 8px; }
+.reto {
+  background: white; border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden;
+}
+.reto.done { border-color: rgba(46,125,82,.3); background: var(--green-soft); }
+.reto.locked { background: var(--paper-2); opacity: .65; }
+
+.reto-head {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 13px 14px; cursor: pointer;
+}
+.reto-check {
+  width: 22px; height: 22px; border-radius: 50%;
+  border: 1.5px solid var(--border-2); flex-shrink: 0; margin-top: 1px;
+  display: flex; align-items: center; justify-content: center;
+}
+.reto.done .reto-check { background: var(--green); border-color: var(--green); }
+.reto-check svg { width: 12px; height: 12px; stroke: white; stroke-width: 2.5; display: none; }
+.reto.done .reto-check svg { display: block; }
+
+.reto-body { flex: 1; }
+.reto-title { font-size: 14px; font-weight: 500; color: var(--ink); line-height: 1.35; }
+.reto.locked .reto-title { color: var(--ink-3); }
+.reto-desc { font-size: 12px; color: var(--ink-3); margin-top: 3px; line-height: 1.45; }
+.reto-tags { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 7px; }
+.tag {
+  font-size: 11px; padding: 2px 8px; border-radius: 20px;
+  border: 1px solid var(--border);
+}
+.tag-pts { color: var(--gold); background: var(--gold-soft); border-color: rgba(184,134,11,.2); }
+.tag-tipo { color: var(--ink-3); background: var(--paper-2); }
+.tag-cat { color: var(--red); background: var(--red-soft); border-color: rgba(192,57,43,.2); }
+
+/* ── Reto panel ── */
+.reto-panel { padding: 0 14px 14px; display: none; flex-direction: column; gap: 10px; }
+.reto.open .reto-panel { display: flex; }
+
+.hint-box {
+  background: var(--gold-soft); border-radius: 8px; padding: 10px 12px;
+  border: 1px solid rgba(184,134,11,.2); display: none;
+}
+.hint-box.visible { display: block; }
+.hint-label { font-size: 11px; color: var(--gold); font-weight: 500; margin-bottom: 3px; }
+.hint-text { font-size: 12px; color: var(--ink-2); line-height: 1.5; }
+
+.hint-btn {
+  width: 100%; padding: 9px; border-radius: 8px;
+  border: 1px solid rgba(184,134,11,.3); background: none;
+  font-size: 12px; color: var(--gold); cursor: pointer; font-family: 'Inter', sans-serif;
+}
+.hint-btn:hover { background: var(--gold-soft); }
+
+.note-label { font-size: 11px; color: var(--ink-3); font-style: italic; }
+.note-area {
+  width: 100%; min-height: 64px; border-radius: 8px;
+  border: 1px solid var(--border-2); background: var(--paper);
+  padding: 9px 10px; font-size: 13px; color: var(--ink);
+  font-family: 'Inter', sans-serif; resize: none; line-height: 1.4;
+}
+.note-area:focus { outline: none; border-color: var(--red); }
+
+.upload-btn {
+  width: 100%; padding: 10px; border-radius: 8px;
+  border: 1px solid var(--border-2); background: white;
+  font-size: 13px; color: var(--ink); cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+  font-family: 'Inter', sans-serif;
+}
+.upload-btn:hover { background: var(--paper-2); }
+.upload-btn.done-state { background: var(--green-soft); border-color: rgba(46,125,82,.3); color: var(--green); }
+
+.submit-btn {
+  width: 100%; padding: 11px; border-radius: 8px;
+  border: none; background: var(--red);
+  font-size: 13px; color: white; cursor: pointer;
+  font-family: 'Inter', sans-serif; font-weight: 500;
+}
+.submit-btn:hover { background: #a93226; }
+
+.done-state-msg {
+  display: flex; align-items: center; gap: 8px; padding: 10px 12px;
+  background: var(--green-soft); border-radius: 8px;
+  font-size: 13px; color: var(--green);
+  border: 1px solid rgba(46,125,82,.2);
+}
+
+/* ── Loading ── */
+.loading { padding: 40px 16px; text-align: center; color: var(--ink-3); font-size: 13px; }
+.loading-kana { font-family: 'Noto Serif JP', serif; font-size: 32px; color: var(--red); animation: pulse 1.5s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+/* ── Bingo ── */
+.bingo-wrap { padding: 16px; }
+.bingo-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin-top: 10px; }
+.bingo-cell {
+  aspect-ratio: 1; border-radius: 6px; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 3px; border: 1px solid transparent;
+  transition: transform .1s;
+}
+.bingo-cell:active { transform: scale(.95); }
+.bingo-cell.empty { background: #2C2A26; }
+.bingo-cell.mine-todo { background: var(--paper-3); border-color: var(--border); }
+.bingo-cell.mine-done { background: var(--green-soft); border-color: rgba(46,125,82,.3); }
+.bingo-cell.other-done { background: var(--gold-soft); border-color: rgba(184,134,11,.2); }
+.bingo-cell.selected { outline: 2px solid var(--red); outline-offset: 2px; }
+.bingo-cell-icon { font-size: 16px; }
+.bingo-cell-name { font-size: 6px; text-align: center; line-height: 1.2; margin-top: 2px; color: var(--ink-3); }
+.bingo-cell.empty .bingo-cell-icon { opacity: .25; }
+.bingo-cell.empty .bingo-cell-name { color: #6B6B62; opacity: .4; }
+.bingo-cell.mine-done .bingo-cell-name { color: var(--green); }
+
+.bingo-detail {
+  background: white; border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 14px; margin-top: 12px; display: none; flex-direction: column; gap: 10px;
+}
+.bingo-detail.visible { display: flex; }
+.bingo-detail-title { font-family: 'Noto Serif JP', serif; font-size: 16px; font-weight: 500; }
+.bingo-detail-desc { font-size: 13px; color: var(--ink-2); line-height: 1.5; }
+.bingo-detail-pts { font-size: 12px; color: var(--gold); }
+
+/* ── Ranking ── */
+.ranking-wrap { padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+.rank-tabs { display: flex; gap: 6px; margin-bottom: 8px; }
+.rank-tab {
+  font-size: 12px; padding: 5px 12px; border-radius: 20px;
+  border: 1px solid var(--border); background: white; color: var(--ink-3); cursor: pointer;
+  font-family: 'Inter', sans-serif;
+}
+.rank-tab.active { background: var(--ink); color: white; border-color: var(--ink); }
+
+.rank-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 14px; background: white; border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.rank-row.me { border-color: rgba(192,57,43,.3); background: var(--red-soft); }
+.rank-pos { font-size: 13px; color: var(--ink-4); width: 20px; text-align: center; }
+.rank-avatar { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+.rank-name { flex: 1; font-size: 14px; font-weight: 500; color: var(--ink); }
+.rank-row.me .rank-name { color: var(--red); }
+.rank-pts { font-size: 13px; font-weight: 500; }
+.rank-coins-small { font-size: 11px; color: var(--gold); }
+
+/* ── Empty state ── */
+.empty-state { padding: 40px 24px; text-align: center; color: var(--ink-3); }
+.empty-kana { font-family: 'Noto Serif JP', serif; font-size: 40px; color: var(--paper-3); }
+.empty-msg { font-size: 13px; margin-top: 8px; }
+
+/* ── Error ── */
+.error-banner {
+  margin: 16px; padding: 12px 14px; background: var(--red-soft);
+  border: 1px solid rgba(192,57,43,.2); border-radius: 8px;
+  font-size: 13px; color: var(--red);
+}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+  <!-- LOGIN -->
+  <div class="screen active" id="screen-login">
+    <div class="login-hero">
+      <div class="login-kana">日本</div>
+      <div class="login-title">Japón 2026</div>
+      <div class="login-sub">¿Quién eres hoy?</div>
+    </div>
+    <div class="players-grid" id="players-grid">
+      <!-- Generated -->
+    </div>
+  </div>
+
+  <!-- RETOS -->
+  <div class="screen" id="screen-retos">
+    <div class="topbar" id="topbar-retos"></div>
+    <div id="retos-content"><div class="loading"><div class="loading-kana">今</div><p style="margin-top:12px">Cargando retos...</p></div></div>
+  </div>
+
+  <!-- BINGO -->
+  <div class="screen" id="screen-bingo">
+    <div class="topbar" id="topbar-bingo"></div>
+    <div class="bingo-wrap" id="bingo-content"><div class="loading"><div class="loading-kana">ビ</div><p style="margin-top:12px">Cargando bingo...</p></div></div>
+  </div>
+
+  <!-- RANKING -->
+  <div class="screen" id="screen-ranking">
+    <div class="topbar" id="topbar-ranking"></div>
+    <div class="ranking-wrap" id="ranking-content"></div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav" id="bottom-nav" style="display:none">
+    <button class="nav-btn active" onclick="switchScreen('retos')" id="nav-retos">
+      <svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="12" y2="16"/></svg>
+      Retos
+    </button>
+    <button class="nav-btn" onclick="switchScreen('bingo')" id="nav-bingo">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Bingo
+    </button>
+    <button class="nav-btn" onclick="switchScreen('ranking')" id="nav-ranking">
+      <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Ranking
+    </button>
+  </nav>
+</div>
+
+<script>
+// ── Config ──────────────────────────────────────────────
+const NOTION_TOKEN = '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';
+const DB_ID = '2db2082f-017e-4b59-bbe4-2796e8e64b08';
+const PROXY = 'https://api.allorigins.win/get?url=';
+const GDRIVE_CLIENT_ID = '490781611806-hocbk23mtqt2gp95da33kqshm6f80vfv.apps.googleusercontent.com';
+const GDRIVE_FOLDER_ID = '1BxfUM9gtdskf4ZULtRXB3659N0XeZIfh';
+const GDRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
+
+const PLAYERS = [
+  { id:'yulia',  name:'Yulia',  role:'Game master',   emoji:'📷', color:'#2E7D52', bg:'#E8F5EE' },
+  { id:'cris',   name:'Cris',   role:'El curioso',    emoji:'🔍', color:'#1565C0', bg:'#E3F2FD' },
+  { id:'eric',   name:'Eric',   role:'El aventurero', emoji:'⚡', color:'#E65100', bg:'#FFF3E0' },
+  { id:'mary',   name:'Mary',   role:'La detallista', emoji:'🌸', color:'#6A1B9A', bg:'#F3E5F5' },
+  { id:'manolo', name:'Manolo', role:'El observador', emoji:'🚗', color:'#2E7D32', bg:'#E8F5E9' },
+];
+
+// ── State ────────────────────────────────────────────────
+let currentPlayer = null;
+let currentScreen = 'retos';
+let allRetos = [];
+let allHitos = [];
+let submitted = JSON.parse(localStorage.getItem('submitted') || '{}');
+let coins = JSON.parse(localStorage.getItem('coins') || '{}');
+let openPanels = {};
+let shownHints = {};
+let selectedHito = null;
+
+// ── Init ─────────────────────────────────────────────────
+function init() {
+  // Build player grid
+  const grid = document.getElementById('players-grid');
+  PLAYERS.forEach(p => {
+    const btn = document.createElement('button');
+    btn.className = 'player-btn';
+    btn.innerHTML = `
+      <div class="player-avatar" style="background:${p.bg};color:${p.color}">${p.emoji}</div>
+      <div class="player-info">
+        <div class="player-name">${p.name}</div>
+        <div class="player-role">${p.role}</div>
+      </div>
+    `;
+    btn.onclick = () => selectPlayer(p);
+    grid.appendChild(btn);
+  });
+}
+
+function selectPlayer(p) {
+  currentPlayer = p;
+  if (!coins[p.id]) coins[p.id] = 0;
+  document.getElementById('screen-login').classList.remove('active');
+  document.getElementById('bottom-nav').style.display = 'flex';
+  switchScreen('retos');
+  loadData();
+}
+
+// ── Data from Notion ─────────────────────────────────────
+async function loadData() {
+  try {
+    const resp = await fetch('/api/notion', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    if (!resp.ok) throw new Error('Network error');
+    const data = await resp.json();
+
+    if (!data.results) throw new Error('No results');
+
+    const results = data.results;
+    allRetos = results.filter(r => getProp(r, 'Tipo') === 'Reto diario');
+    allHitos = results.filter(r => getProp(r, 'Tipo') === 'Hito bingo');
+
+    renderRetos();
+    renderBingo();
+    renderRanking();
+  } catch(e) {
+    showError('No se pudieron cargar los retos. Comprueba la conexión.');
+    renderRetosOffline();
+  }
+}
+
+function getProp(page, key) {
+  const p = page.properties[key];
+  if (!p) return null;
+  if (p.type === 'select') return p.select?.name || null;
+  if (p.type === 'multi_select') return p.multi_select?.map(x=>x.name) || [];
+  if (p.type === 'rich_text') return p.rich_text?.map(x=>x.plain_text).join('') || '';
+  if (p.type === 'title') return p.title?.map(x=>x.plain_text).join('') || '';
+  if (p.type === 'date') return p.date?.start || null;
+  return null;
+}
+
+// ── Topbar ───────────────────────────────────────────────
+function renderTopbar(containerId) {
+  const p = currentPlayer;
+  const c = coins[p.id] || 0;
+  document.getElementById(containerId).innerHTML = `
+    <div class="topbar-player">
+      <div class="topbar-avatar" style="background:${p.bg};color:${p.color}">${p.emoji}</div>
+      <span class="topbar-name" style="color:${p.color}">${p.name}</span>
+    </div>
+    <div class="topbar-coins">🪙 ${c}</div>
+  `;
+}
+
+// ── Retos ────────────────────────────────────────────────
+function getTodayDate() {
+  const today = new Date();
+  // Trip dates: Oct 5–15 2026
+  const tripDates = [
+    '2026-10-05','2026-10-06','2026-10-07','2026-10-08','2026-10-09',
+    '2026-10-10','2026-10-11','2026-10-12','2026-10-13','2026-10-14','2026-10-15'
+  ];
+  const todayStr = today.toISOString().split('T')[0];
+  if (tripDates.includes(todayStr)) return todayStr;
+  // Outside trip: show first day for testing
+  return '2026-10-05';
+}
+
+function renderRetos() {
+  renderTopbar('topbar-retos');
+  const dateStr = getTodayDate();
+  const todayRetos = allRetos.filter(r => getProp(r, 'Fecha del reto') === dateStr && getProp(r, 'Estado') !== 'Descartado');
+  
+  const sensoriales = todayRetos.filter(r => getProp(r, 'Categoría') === 'Sensorial');
+  const lugar = todayRetos.filter(r => getProp(r, 'Categoría') === 'Lugar');
+  const otros = todayRetos.filter(r => !['Sensorial','Lugar'].includes(getProp(r, 'Categoría')));
+
+  const dateObj = new Date(dateStr + 'T12:00:00');
+  const dayNames = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+  const cityMap = {
+    '2026-10-05':'Osaka — llegada','2026-10-06':'Osaka','2026-10-07':'Kyoto — llegada',
+    '2026-10-08':'Arashiyama','2026-10-09':'Kyoto norte','2026-10-10':'Kyoto centro',
+    '2026-10-11':'Fushimi → Tokyo','2026-10-12':'Tokyo este','2026-10-13':'Tokyo oeste',
+    '2026-10-14':'Tokyo','2026-10-15':'Último día'
+  };
+
+  const totalOblig = [...sensoriales, ...lugar].length;
+  const doneOblig = [...sensoriales, ...lugar].filter(r => submitted[r.id]).length;
+  const totalAll = todayRetos.length;
+  const doneAll = todayRetos.filter(r => submitted[r.id]).length;
+  const pct = totalAll ? Math.round(doneAll/totalAll*100) : 0;
+  const labels = ['Empieza a disparar','Vamos bien','¡Casi!','¡Día completado!'];
+  const li = doneAll===totalAll&&totalAll>0?3:pct>60?2:pct>0?1:0;
+
+  let html = `
+    <div class="day-header">
+      <div class="day-eyebrow">${dayNames[dateObj.getDay()]} · ${dateStr.slice(8,10)} oct</div>
+      <div class="day-title">${cityMap[dateStr] || 'Hoy'}</div>
+      <div class="day-deadline">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Entrega antes de medianoche
+      </div>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-top"><span>${labels[li]}</span><span>${doneAll}/${totalAll}</span></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+    </div>
+  `;
+
+  if (sensoriales.length) {
+    html += `<div class="section-label">Obligatorio · sensorial</div>`;
+    sensoriales.forEach(r => html += retoCard(r));
+  }
+  if (lugar.length) {
+    html += `<div class="section-label">Obligatorio · de lugar</div>`;
+    lugar.forEach(r => html += retoCard(r));
+  }
+  if (otros.length) {
+    html += `<div class="section-label">Otros retos de hoy</div>`;
+    otros.forEach(r => html += retoCard(r));
+  }
+
+  // Opcional locked/unlocked
+  const unlocked = doneOblig >= totalOblig && totalOblig > 0;
+  html += `<div class="section-label">Opcional</div>`;
+  if (unlocked) {
+    html += `<div class="reto-wrap"><div class="reto" style="border-color:rgba(192,57,43,.3)">
+      <div class="reto-head"><div class="reto-check" style="border-color:var(--red)"></div>
+      <div class="reto-body"><div class="reto-title">Reto desbloqueado 🎉</div>
+      <div class="reto-desc">Completa el reto de atrevimiento del día — próximamente.</div>
+      <div class="reto-tags"><span class="tag tag-pts">3 pts</span></div></div></div></div></div>`;
+  } else {
+    html += `<div class="reto-wrap"><div class="reto locked">
+      <div class="reto-head"><div class="reto-check">🔒</div>
+      <div class="reto-body"><div class="reto-title">Completa los obligatorios</div>
+      <div class="reto-desc">Se desbloquea cuando entregues los retos de hoy.</div></div></div></div></div>`;
+  }
+
+  html += '<div style="height:16px"></div>';
+
+  if (todayRetos.length === 0) {
+    html = `<div class="empty-state"><div class="empty-kana">休</div><div class="empty-msg">No hay retos asignados para este día.</div></div>`;
+  }
+
+  document.getElementById('retos-content').innerHTML = html;
+}
+
+function retoCard(r) {
+  const id = r.id;
+  const nombre = getProp(r, 'Nombre') || 'Sin nombre';
+  const desc = getProp(r, 'Pista') || '';
+  const pts = getProp(r, 'Puntos') || '';
+  const cat = getProp(r, 'Categoría') || '';
+  const prueba = getProp(r, 'Prueba requerida') || [];
+  const isDone = !!submitted[id];
+  const isOpen = !!openPanels[id];
+  const hintShown = !!shownHints[id];
+
+  const tipos = Array.isArray(prueba) ? prueba : [prueba];
+  const tipoIcons = { 'Foto':'📷', 'Vídeo':'🎥', 'Audio':'🎙️', 'Nota':'📝', 'Selfie':'🤳' };
+
+  let panel = '';
+  if (isDone) {
+    panel = `<div class="done-state-msg"><span>✅</span> Entregado — revisión esta noche</div>`;
+  } else {
+    panel = `
+      ${desc ? `<div class="hint-box${hintShown?' visible':''}"><div class="hint-label">💡 Pista</div><div class="hint-text">${desc}</div></div>` : ''}
+      <textarea class="note-area" id="note-${id}" placeholder="Escribe una nota sobre este reto..."></textarea>
+      <button class="upload-btn" id="ubtn-${id}" onclick="simUpload('${id}')">⬆️ Subir archivo</button>
+      ${desc && !hintShown ? `<button class="hint-btn" onclick="showHint('${id}')">💡 Ver pista · 5 monedas</button>` : ''}
+      <button class="submit-btn" onclick="markDone('${id}')">Entregar →</button>
+    `;
+  }
+
+  return `
+    <div class="reto-wrap">
+      <div class="reto${isDone?' done':''}${isOpen&&!isDone?' open':''}" id="reto-${id}">
+        <div class="reto-head" onclick="toggleReto('${id}')">
+          <div class="reto-check">
+            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="reto-body">
+            <div class="reto-title">${nombre}</div>
+            <div class="reto-tags">
+              ${pts ? `<span class="tag tag-pts">${pts}</span>` : ''}
+              <span class="tag tag-cat">${cat}</span>
+              ${tipos.map(t => t ? `<span class="tag tag-tipo">${tipoIcons[t]||''} ${t}</span>` : '').join('')}
+            </div>
+          </div>
+        </div>
+        <div class="reto-panel" id="panel-${id}">${panel}</div>
+      </div>
+    </div>
+  `;
+}
+
+function toggleReto(id) {
+  if (submitted[id]) return;
+  openPanels[id] = !openPanels[id];
+  const card = document.getElementById(`reto-${id}`);
+  if (card) card.classList.toggle('open', !!openPanels[id]);
+}
+
+function showHint(id) {
+  shownHints[id] = true;
+  coins[currentPlayer.id] = Math.max(0, (coins[currentPlayer.id]||0) - 5);
+  localStorage.setItem('coins', JSON.stringify(coins));
+  renderRetos();
+}
+
+// ── Google Drive ─────────────────────────────────────────
+let gdriveToken = null;
+
+function loadGoogleAPI() {
+  return new Promise((resolve) => {
+    if (window.google?.accounts) { resolve(); return; }
+    const s = document.createElement('script');
+    s.src = 'https://accounts.google.com/gsi/client';
+    s.onload = resolve;
+    document.head.appendChild(s);
+  });
+}
+
+async function getGDriveToken() {
+  if (gdriveToken) return gdriveToken;
+  await loadGoogleAPI();
+  return new Promise((resolve, reject) => {
+    const client = google.accounts.oauth2.initTokenClient({
+      client_id: GDRIVE_CLIENT_ID,
+      scope: GDRIVE_SCOPE,
+      callback: (resp) => {
+        if (resp.error) reject(resp.error);
+        else { gdriveToken = resp.access_token; resolve(gdriveToken); }
+      }
+    });
+    client.requestAccessToken();
+  });
+}
+
+async function uploadToDrive(file, retoNombre, jugador) {
+  try {
+    const token = await getGDriveToken();
+    const fecha = new Date().toISOString().slice(0,10);
+    const fileName = `${fecha}_${jugador}_${retoNombre.slice(0,30)}_${file.name}`;
+    const metadata = { name: fileName, parents: [GDRIVE_FOLDER_ID] };
+    const form = new FormData();
+    form.append('metadata', new Blob([JSON.stringify(metadata)], {type:'application/json'}));
+    form.append('file', file);
+    const resp = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: form
+    });
+    if (!resp.ok) throw new Error('Upload failed');
+    return await resp.json();
+  } catch(e) {
+    console.error('Drive upload error:', e);
+    throw e;
+  }
+}
+
+async function simUpload(id) {
+  const btn = document.getElementById(`ubtn-${id}`);
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*,video/*,audio/*';
+  input.onchange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (btn) { btn.textContent = '⏳ Subiendo...'; btn.disabled = true; }
+    try {
+      const reto = allRetos.find(r => r.id === id);
+      const nombre = reto ? (getProp(reto,'Nombre')||'reto') : 'reto';
+      await uploadToDrive(file, nombre, currentPlayer.name);
+      if (btn) { btn.textContent = '✅ Archivo subido a Drive'; btn.classList.add('done-state'); btn.disabled = false; }
+    } catch(e) {
+      if (btn) { btn.textContent = '❌ Error — intenta de nuevo'; btn.disabled = false; }
+    }
+  };
+  input.click();
+}
+
+function markDone(id) {
+  submitted[id] = true;
+  localStorage.setItem('submitted', JSON.stringify(submitted));
+  coins[currentPlayer.id] = (coins[currentPlayer.id]||0) + 10;
+  localStorage.setItem('coins', JSON.stringify(coins));
+  renderRetos();
+}
+
+function renderRetosOffline() {
+  renderTopbar('topbar-retos');
+  document.getElementById('retos-content').innerHTML = `
+    <div class="error-banner">No se pudo conectar con Notion. Comprueba tu conexión a internet.</div>
+    <div class="empty-state"><div class="empty-kana">休</div><div class="empty-msg">Los retos aparecerán cuando haya conexión.</div></div>
+  `;
+}
+
+function showError(msg) {
+  const el = document.getElementById('retos-content');
+  if (el) el.innerHTML = `<div class="error-banner">${msg}</div>`;
+}
+
+// ── Bingo ────────────────────────────────────────────────
+function renderBingo() {
+  renderTopbar('topbar-bingo');
+  const confirmed = allHitos.filter(h => getProp(h, 'Estado') === 'Confirmado');
+  const doneCount = confirmed.filter(h => submitted['bingo-'+h.id]).length;
+
+  let html = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+      <div>
+        <div style="font-family:'Noto Serif JP',serif;font-size:18px;font-weight:500">Bingo del viaje</div>
+        <div style="font-size:12px;color:var(--ink-3);margin-top:2px" id="bingo-count">${doneCount} de ${confirmed.length} completados</div>
+      </div>
+    </div>
+    <div class="bingo-grid" id="bingo-grid">
+  `;
+
+  confirmed.forEach((h, i) => {
+    const id = h.id;
+    const nombre = getProp(h, 'Nombre') || '';
+    const cat = getProp(h, 'Categoría') || '';
+    const isDone = !!submitted['bingo-'+id];
+    const catEmoji = { 'Comida':'🍜', 'Lugar':'⛩️', 'Actividad':'🎯', 'Espiritual':'🙏', 'Sensorial':'👁️' };
+    const emoji = catEmoji[cat] || '🎌';
+    const state = isDone ? 'mine-done' : 'mine-todo';
+    const sel = selectedHito === id ? ' selected' : '';
+    html += `<div class="bingo-cell ${state}${sel}" onclick="selectHito('${id}')">
+      <div class="bingo-cell-icon">${emoji}</div>
+      <div class="bingo-cell-name">${nombre.slice(0,18)}</div>
+    </div>`;
+  });
+
+  html += `</div>`;
+
+  // Detail
+  html += `<div class="bingo-detail" id="bingo-detail">
+    <div class="bingo-detail-title" id="bd-title"></div>
+    <div class="bingo-detail-desc" id="bd-desc"></div>
+    <div class="bingo-detail-pts" id="bd-pts"></div>
+    <div id="bd-actions"></div>
+  </div>`;
+
+  document.getElementById('bingo-content').innerHTML = html;
+}
+
+function selectHito(id) {
+  selectedHito = id;
+  const h = allHitos.find(x => x.id === id);
+  if (!h) return;
+
+  // Update grid selection
+  document.querySelectorAll('.bingo-cell').forEach(c => c.classList.remove('selected'));
+  const cells = document.querySelectorAll('.bingo-cell');
+  const confirmed = allHitos.filter(x => getProp(x,'Estado')==='Confirmado');
+  const idx = confirmed.findIndex(x => x.id === id);
+  if (cells[idx]) cells[idx].classList.add('selected');
+
+  const nombre = getProp(h, 'Nombre') || '';
+  const pista = getProp(h, 'Pista') || '';
+  const pts = getProp(h, 'Puntos') || '';
+  const isDone = !!submitted['bingo-'+id];
+
+  document.getElementById('bd-title').textContent = nombre;
+  document.getElementById('bd-desc').textContent = pista || 'Completa este hito durante el viaje.';
+  document.getElementById('bd-pts').textContent = pts ? `${pts} · 2 pts con foto` : '';
+
+  const actEl = document.getElementById('bd-actions');
+  if (isDone) {
+    actEl.innerHTML = `<div class="done-state-msg">✅ Completado</div>`;
+  } else if (submitted['bingo-pending-'+id]) {
+    actEl.innerHTML = `<div class="done-state-msg">⏳ Enviado — revisión pendiente</div>`;
+  } else {
+    actEl.innerHTML = `
+      <textarea class="note-area" id="bnote-${id}" placeholder="¿Cuándo y dónde fue?"></textarea>
+      <button class="upload-btn" id="bubtn-${id}" onclick="bingoUpload('${id}')">⬆️ Subir foto o selfie</button>
+      <button class="submit-btn" onclick="bingoDone('${id}')">Marcar como completado →</button>
+    `;
+  }
+
+  document.getElementById('bingo-detail').classList.add('visible');
+}
+
+async function bingoUpload(id) {
+  const btn = document.getElementById(`bubtn-${id}`);
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*,video/*';
+  input.onchange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (btn) { btn.textContent = '⏳ Subiendo...'; btn.disabled = true; }
+    try {
+      const hito = allHitos.find(h => h.id === id);
+      const nombre = hito ? (getProp(hito,'Nombre')||'hito') : 'hito';
+      await uploadToDrive(file, `BINGO_${nombre}`, currentPlayer.name);
+      if (btn) { btn.textContent = '✅ Foto subida a Drive'; btn.classList.add('done-state'); btn.disabled = false; }
+    } catch(e) {
+      if (btn) { btn.textContent = '❌ Error — intenta de nuevo'; btn.disabled = false; }
+    }
+  };
+  input.click();
+}
+
+function bingoDone(id) {
+  submitted['bingo-pending-'+id] = true;
+  localStorage.setItem('submitted', JSON.stringify(submitted));
+  coins[currentPlayer.id] = (coins[currentPlayer.id]||0) + 10;
+  localStorage.setItem('coins', JSON.stringify(coins));
+  renderBingo();
+  setTimeout(() => selectHito(id), 100);
+}
+
+// ── Ranking ───────────────────────────────────────────────
+function renderRanking() {
+  renderTopbar('topbar-ranking');
+  const ranking = PLAYERS.map(p => ({
+    ...p,
+    pts: Math.floor(Math.random() * 20) + (p.id === currentPlayer.id ? 15 : 5),
+    c: coins[p.id] || 0
+  })).sort((a,b) => b.pts - a.pts);
+
+  let html = `<div class="rank-tabs">
+    <button class="rank-tab active">Total</button>
+    <button class="rank-tab">Retos</button>
+    <button class="rank-tab">Bingo</button>
+  </div>`;
+
+  ranking.forEach((p, i) => {
+    const isMe = p.id === currentPlayer.id;
+    html += `<div class="rank-row${isMe?' me':''}">
+      <div class="rank-pos">${i+1}</div>
+      <div class="rank-avatar" style="background:${p.bg};color:${p.color}">${p.emoji}</div>
+      <div class="rank-name">${p.name}</div>
+      <div style="text-align:right">
+        <div class="rank-pts">${p.pts} pts</div>
+        <div class="rank-coins-small">🪙 ${p.c}</div>
+      </div>
+    </div>`;
+  });
+
+  document.getElementById('ranking-content').innerHTML = html;
+}
+
+// ── Navigation ───────────────────────────────────────────
+function switchScreen(name) {
+  currentScreen = name;
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(`screen-${name}`).classList.add('active');
+  document.getElementById(`nav-${name}`).classList.add('active');
+}
+
+// ── Start ─────────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>
